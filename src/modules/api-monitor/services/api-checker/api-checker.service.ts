@@ -1,13 +1,24 @@
+// src/modules/api-monitor/services/api-checker/api-checker.service.ts
+
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Model } from 'mongoose';
 import axios from 'axios';
-import { ApiStatus, MonitoredApi, MonitoredApiDocument } from '../../schemas/monitored-api.schema';
-import { ApiCheckHistory, ApiCheckHistoryDocument } from '../../schemas/api-check-history.schema';
+
+import {
+  ApiStatus,
+  MonitoredApi,
+  MonitoredApiDocument
+} from '../../schemas/monitored-api.schema';
+
+import {
+  ApiCheckHistory,
+  ApiCheckHistoryDocument
+} from '../../schemas/api-check-history.schema';
+
 import { ApiAlertMailService } from '../api-alert-mail/api-alert-mail.service';
 import { ApiMonitorGateway } from '../../gateways/api-monitor/api-monitor.gateway';
-
 
 @Injectable()
 export class ApiCheckerService {
@@ -26,9 +37,7 @@ export class ApiCheckerService {
 
   @Cron(CronExpression.EVERY_10_SECONDS)
   async handleApiChecks() {
-    const apis = await this.monitoredApiModel
-      .find({ active: true })
-      .exec();
+    const apis = await this.monitoredApiModel.find({ active: true }).exec();
 
     for (const api of apis) {
       const lastCheckedAt = api.lastCheckedAt
@@ -98,6 +107,7 @@ export class ApiCheckerService {
     const newStatus = result.status;
 
     const totalChecks = (api.totalChecks || 0) + 1;
+
     const successChecks =
       (api.successChecks || 0) +
       (newStatus === ApiStatus.ONLINE ? 1 : 0);
@@ -106,10 +116,9 @@ export class ApiCheckerService {
       (api.failedChecks || 0) +
       (newStatus !== ApiStatus.ONLINE ? 1 : 0);
 
-    const uptimePercentage =
-      totalChecks > 0
-        ? Number(((successChecks / totalChecks) * 100).toFixed(2))
-        : 0;
+    const uptimePercentage = Number(
+      ((successChecks / totalChecks) * 100).toFixed(2)
+    );
 
     const checkedAt = new Date();
 
@@ -162,14 +171,18 @@ export class ApiCheckerService {
       responseTimeMs: result.responseTimeMs,
       error: result.error,
       checkedAt,
-      uptimePercentage
+      uptimePercentage,
+      totalChecks,
+      successChecks,
+      failedChecks
     };
 
     this.apiMonitorGateway.emitStatusChanged(payload);
+    this.apiMonitorGateway.emitApiChecked(payload);
 
     this.logger.log(
       `[${api.name}] ${newStatus} - ${result.statusCode || '-'} - ${
-        result.responseTimeMs
+        result.responseTimeMs || 0
       }ms`
     );
 
