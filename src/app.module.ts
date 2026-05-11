@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ApiMonitorModule } from './modules/api-monitor/api-monitor.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -20,7 +21,9 @@ import { ApiMonitorModule } from './modules/api-monitor/api-monitor.module';
 
     ScheduleModule.forRoot(),
 
-    ApiMonitorModule
+    ApiMonitorModule,
+
+    AuthModule
   ]
 })
 export class AppModule {}

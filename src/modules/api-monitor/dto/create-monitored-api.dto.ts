@@ -1,15 +1,16 @@
 import {
     IsArray,
     IsBoolean,
+    IsDateString,
     IsNumber,
     IsObject,
     IsOptional,
     IsString,
     IsUrl,
     Min
-  } from 'class-validator';
+} from 'class-validator';
   
-  import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
   
   export class CreateMonitoredApiDto {
     @ApiProperty({
@@ -24,54 +25,117 @@ import {
     @IsUrl()
     url: string;
   
-    @ApiProperty({
-      example: 'GET',
-      required: false
+    @ApiPropertyOptional({
+      example: 'GET'
     })
     @IsOptional()
     @IsString()
     method?: string;
   
-    @ApiProperty({
+    @ApiPropertyOptional({
       example: {
         Authorization: 'Bearer token'
-      },
-      required: false
+      }
     })
     @IsOptional()
     @IsObject()
     headers?: Record<string, string>;
   
-    @ApiProperty({
-      example: 10,
-      required: false
+    @ApiPropertyOptional({
+      example: {
+        username: 'teste',
+        password: '123'
+      }
+    })
+    @IsOptional()
+    body?: any;
+  
+    @ApiPropertyOptional({
+      example: [200, 201, 204]
+    })
+    @IsOptional()
+    @IsArray()
+    expectedStatusCodes?: number[];
+  
+    @ApiPropertyOptional({
+      example: 'success'
+    })
+    @IsOptional()
+    @IsString()
+    expectedText?: string;
+  
+    @ApiPropertyOptional({
+      example: 2000
+    })
+    @IsOptional()
+    @IsNumber()
+    @Min(100)
+    maxResponseTimeMs?: number;
+  
+    @ApiPropertyOptional({
+      example: 30
     })
     @IsOptional()
     @IsNumber()
     @Min(5)
     intervalSeconds?: number;
   
-    @ApiProperty({
-      example: 5000,
-      required: false
+    @ApiPropertyOptional({
+      example: 10000
     })
     @IsOptional()
     @IsNumber()
+    @Min(1000)
     timeoutMs?: number;
   
-    @ApiProperty({
-      example: ['teste@gmail.com'],
-      required: false
+    @ApiPropertyOptional({
+      example: 3
+    })
+    @IsOptional()
+    @IsNumber()
+    @Min(1)
+    failureThreshold?: number;
+  
+    @ApiPropertyOptional({
+      example: 2
+    })
+    @IsOptional()
+    @IsNumber()
+    @Min(1)
+    recoveryThreshold?: number;
+  
+    @ApiPropertyOptional({
+      example: ['teste@gmail.com']
     })
     @IsOptional()
     @IsArray()
     alertEmails?: string[];
   
-    @ApiProperty({
-      example: true,
-      required: false
+    @ApiPropertyOptional({
+      example: true
     })
     @IsOptional()
     @IsBoolean()
     active?: boolean;
-  }
+  
+    @ApiPropertyOptional({
+      example: false
+    })
+    @IsOptional()
+    @IsBoolean()
+    maintenanceMode?: boolean;
+  
+    @ApiPropertyOptional({
+      example: '2026-05-11T18:00:00.000Z'
+    })
+    @IsOptional()
+    @IsDateString()
+    maintenanceUntil?: string;
+  
+    @ApiPropertyOptional({
+      example: 'Manutenção programada no servidor'
+    })
+    @IsOptional()
+    @IsString()
+    maintenanceReason?: string;
+}

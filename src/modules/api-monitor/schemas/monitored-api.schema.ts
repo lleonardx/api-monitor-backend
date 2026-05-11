@@ -6,7 +6,8 @@ export type MonitoredApiDocument = HydratedDocument<MonitoredApi>;
 export enum ApiStatus {
   ONLINE = 'ONLINE',
   OFFLINE = 'OFFLINE',
-  TIMEOUT = 'TIMEOUT'
+  TIMEOUT = 'TIMEOUT',
+  MAINTENANCE = 'MAINTENANCE'
 }
 
 @Schema({
@@ -44,6 +45,20 @@ export class MonitoredApi {
   body?: any;
 
   @Prop({
+    type: [Number],
+    default: [200, 201, 202, 204]
+  })
+  expectedStatusCodes: number[];
+
+  @Prop()
+  expectedText?: string;
+
+  @Prop({
+    default: 5000
+  })
+  maxResponseTimeMs: number;
+
+  @Prop({
     default: 30
   })
   intervalSeconds: number;
@@ -52,6 +67,26 @@ export class MonitoredApi {
     default: 10000
   })
   timeoutMs: number;
+
+  @Prop({
+    default: 3
+  })
+  failureThreshold: number;
+
+  @Prop({
+    default: 2
+  })
+  recoveryThreshold: number;
+
+  @Prop({
+    default: 0
+  })
+  consecutiveFailures: number;
+
+  @Prop({
+    default: 0
+  })
+  consecutiveSuccesses: number;
 
   @Prop({
     type: [String],
@@ -101,6 +136,17 @@ export class MonitoredApi {
     default: true
   })
   active: boolean;
+
+  @Prop({
+    default: false
+  })
+  maintenanceMode: boolean;
+
+  @Prop()
+  maintenanceUntil?: Date;
+
+  @Prop()
+  maintenanceReason?: string;
 }
 
 export const MonitoredApiSchema =
@@ -109,3 +155,4 @@ export const MonitoredApiSchema =
 MonitoredApiSchema.index({ name: 1 });
 MonitoredApiSchema.index({ currentStatus: 1 });
 MonitoredApiSchema.index({ active: 1 });
+MonitoredApiSchema.index({ maintenanceMode: 1 });
