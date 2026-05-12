@@ -6,27 +6,32 @@ import {
     Param,
     Patch,
     Post,
-    Query
-  } from '@nestjs/common';
-  
-  import {
+    Query,
+    UseGuards
+} from '@nestjs/common';
+
+import {
+    ApiBearerAuth,
     ApiOperation,
     ApiParam,
     ApiQuery,
     ApiTags
-  } from '@nestjs/swagger';
-  
-  import { ApiMonitorService } from './services/api-monitor/api-monitor.service';
-  
-  import { CreateMonitoredApiDto } from './dto/create-monitored-api.dto';
-  import { UpdateMonitoredApiDto } from './dto/update-monitored-api.dto';
+} from '@nestjs/swagger';
+
+import { ApiMonitorService } from './services/api-monitor/api-monitor.service';
+
+import { CreateMonitoredApiDto } from './dto/create-monitored-api.dto';
+import { UpdateMonitoredApiDto } from './dto/update-monitored-api.dto';
+import { MaintenanceMonitoredApiDto } from './dto/maintenance-monitored-api.dto';
+
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
   
   @ApiTags('API Monitor')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Controller('api-monitor')
   export class ApiMonitorController {
-    constructor(
-      private readonly apiMonitorService: ApiMonitorService
-    ) {}
+    constructor(private readonly apiMonitorService: ApiMonitorService) {}
   
     @Post()
     @ApiOperation({
@@ -42,6 +47,14 @@ import {
     })
     findAll() {
       return this.apiMonitorService.findAll();
+    }
+  
+    @Get('summary')
+    @ApiOperation({
+      summary: 'Resumo geral do monitoramento'
+    })
+    getSummary() {
+      return this.apiMonitorService.getSummary();
     }
   
     @Get('history')
@@ -120,6 +133,42 @@ import {
       return this.apiMonitorService.update(id, dto);
     }
   
+    @Patch(':id/pause')
+    @ApiOperation({
+      summary: 'Pausar monitoramento da API'
+    })
+    @ApiParam({
+      name: 'id'
+    })
+    pause(@Param('id') id: string) {
+      return this.apiMonitorService.pause(id);
+    }
+  
+    @Patch(':id/resume')
+    @ApiOperation({
+      summary: 'Retomar monitoramento da API'
+    })
+    @ApiParam({
+      name: 'id'
+    })
+    resume(@Param('id') id: string) {
+      return this.apiMonitorService.resume(id);
+    }
+  
+    @Patch(':id/maintenance')
+    @ApiOperation({
+      summary: 'Ativar ou desativar modo manutenção'
+    })
+    @ApiParam({
+      name: 'id'
+    })
+    setMaintenance(
+      @Param('id') id: string,
+      @Body() dto: MaintenanceMonitoredApiDto
+    ) {
+      return this.apiMonitorService.setMaintenance(id, dto);
+    }
+  
     @Delete(':id')
     @ApiOperation({
       summary: 'Remover API monitorada'
@@ -141,4 +190,4 @@ import {
     checkNow(@Param('id') id: string) {
       return this.apiMonitorService.checkNow(id);
     }
-  }
+}
