@@ -18,7 +18,7 @@ export class User {
     required: true,
     trim: true
   })
-  name: string;
+  name!: string;
 
   @Prop({
     required: true,
@@ -26,23 +26,23 @@ export class User {
     lowercase: true,
     trim: true
   })
-  email: string;
+  email!: string;
 
   @Prop({
     required: true
   })
-  password: string;
+  password!: string;
 
   @Prop({
     enum: UserRole,
     default: UserRole.USER
   })
-  role: UserRole;
+  role!: UserRole;
 
   @Prop({
     default: true
   })
-  active: boolean;
+  active!: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
